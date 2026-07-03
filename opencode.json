@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "builder": {
+      "description": "Implementa código sob demanda — lê a task, implementa, reporta.",
+      "mode": "subagent",
+      "prompt": "{file:./.opencode/agents/builder.md}",
+      "permission": {
+        "*": "allow"
+      }
+    }
+  }
+}

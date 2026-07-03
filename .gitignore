@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.env
+
+# IDE
+.obsidian/
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Git
+*.orig
+
+# OpenCode
+.opencode/

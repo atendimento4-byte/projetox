@@ -1,0 +1,1 @@
+# ProjetoX - Assistente inteligente para atendimentos tecnicos
