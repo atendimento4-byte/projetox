@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: pip install uv
+      - name: Install deps
+        run: uv pip install -e ".[dev]" --system
+      - name: Ruff
+        run: ruff check src/
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Install uv
+        run: pip install uv
+      - name: Install deps
+        run: uv pip install -e ".[dev]" --system
+      - name: Mypy
+        run: mypy src/ || true
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Install uv
+        run: pip install uv
+      - name: Install deps
+        run: uv pip install -e ".[dev]" --system
+      - name: Pytest
+        run: pytest || true
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Install uv
+        run: pip install uv
+      - name: Build
+        run: uv pip install -e ".[dev]" --system

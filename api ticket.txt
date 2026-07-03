@@ -1,0 +1,962 @@
+or Moyses Tonelli em 29/06/2026 10:37
+Importante: Nossas API's possuem um limite de 10 requisições por minuto para garantir um comportamento saudável no seu uso. Caso você tenha um cenário específico que precise aumentar o uso, entre em contato com o nosso time de atendimento para análise de viabilidade. Saiba mais sobre horários e limites das API's
+Atenção: Ao disparar 3 requisições na API de Tickets que estejam com erro, será retornado uma mensagem pela nossa API com o código ‘429 - Too many failed requests’. Também bloquearemos novas requisições por 60 segundos.
+Se tentar mais 3 vezes com erros, o tempo aumenta para 120 segundos. Caso tente ainda mais 3 vezes, o tempo aumenta para 300 segundos.
+
+É possível acompanhar quanto tempo falta para poder enviar novas requisições sem bloqueio através do parâmetro ‘retry-after’ existente no header que terá no retorno da nossa API.
+
+https://api.movidesk.com/public/v1
+Tickets
+  URL:    /tickets
+  Métodos: GET / POST / PATCH
+Atenção: A rota /tickets traz os tickets com a data de atualização (lastupdate) inferior a 90 dias. Tickets que possuem uma data de atualização mais antiga devem ser buscados na rota /tickets/past.
+ 
+
+
+Layout
+ticket
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	string	10	 	Número do ticket (somente leitura).
+protocol	string	30	 	Protocolo do ticket (somente leitura). *Caso não utilizado será apresentado como null.
+type	int	1	✓	Tipo do ticket. 1 = Interno 2 = Público.
+subject	string	350	 	Assunto do ticket.
+category	string	128	 	Nome da categoria do ticket. Deve ser informada uma categoria existente e que esteja relacionada ao tipo e ao serviço (caso este esteja informado) do ticket.
+urgency	string	128	 	Nome da urgência do ticket. Deve ser informada uma urgência existente e que esteja relacionada a categoria (caso esta esteja informada no ticket).
+status	string	128	*	Nome do status do ticket. Para alterar esse campo deve ser também informada a justificativa. O status deve ser um existente e que esteja relacionado ao tipo do ticket. *Caso não informado, será utilizado o status base Novo padrão.
+baseStatus	string	128	 	
+Nome do status base do ticket (Somente leitura).
+
+New,
+InAttendance,
+Stopped,
+Canceled,
+Resolved,
+Closed
+
+justification	string	128	 	Nome da justificativa do ticket. Deve ser informada uma justificativa existente que esteja relacionada ao status do ticket. O preenchimento desse campo é obrigatório quando o status do ticket o exigir. Para alterar esse campo deve ser também informado o status.
+origin	int	1	 	Canal de abertura do ticket (Somente leitura).
+1	Via web pelo cliente
+2	Via web pelo agente
+3	Recebido via email
+4	Gatilho do sistema
+5	Chat (online)
+7	Email enviado pelo sistema
+8	Formulário de contato
+9	Via web API
+10	Agendamento automático 
+11	JiraIssue
+12	RedmineIssue
+13	ReceivedCall
+14	MadeCall
+15	LostCall
+16	DropoutCall
+17	Acesso remoto
+ATENÇÃO: O módulo de acesso remoto foi descontinuado e não esta mais sendo comercializado pela Movidesk desde 12/2022
+18	WhatsApp
+19	MovideskIntegration
+20	ZenviaChat
+21	NotAnsweredCall
+22	FacebookMessenger
+23	WhatsApp Business Movidesk
+24	Altu
+25	WhatsApp Ativo
+createdDate	datetime UTC	7	* 	Data de abertura do ticket. A data informada deve estar no formato UTC*. *Caso não for informada, será preenchida com a data atual. Somente leitura após a criação.
+originEmailAccount	string	128	 	Conta de e-mail na qual o ticket foi recebido (Somente leitura).
+owner	person	 	 	Dados do responsável pelo ticket. Para alterar esse campo deve ser informada também a equipe do responsável pelo ticket. ver documentação
+ownerTeam	string	128	 	Equipe do responsável pelo ticket. Para alterar esse campo deve ser informado também o responsável pelo ticket. Caso o responsável pelo ticket esteja informado, a equipe do responsável deve estar associada a ele.
+createdBy	person	 	✓	Dados do gerador do ticket. ver documentação
+serviceFull	array	1024	 	Lista com os nomes dos níveis do serviço selecionado no ticket (Somente leitura).
+serviceFirstLevelId	int	10	 	Id (Código) do serviço selecionado no ticket.
+serviceFirstLevel	string	1024	 	Nome do primeiro nível do serviço selecionado no ticket (Somente leitura).
+Nome do serviço que esta selecionado no ticket.
+
+serviceSecondLevel	string	1024	 	Nome do segundo nível do serviço selecionado no ticket (Somente leitura).
+serviceThirdLevel	string	1024	 	Nome do terceiro nível do serviço selecionado no ticket (Somente leitura).
+Nome do serviço de primeiro nível.
+image (37).png
+
+contactForm	string	128	 	Nome do formulário de contato através do qual o ticket foi aberto (Somente leitura).
+tags	array	 	 	Lista de strings com as TAGs as quais o ticket esta relacionado. Caso sejam informadas TAGs inexistentes, as mesmas serão adicionadas na base de dados.
+cc	string	1024	 	Relação dos e-mails informados no campo Cc, separados por vírgula (Somente leitura).
+resolvedIn	datetime UTC	 	 	Data na qual o ticket foi indicado pelo agente como resolvido. A data informada deve estar no formato UTC.
+reopenedIn	datetime UTC	 	 	Data na qual o ticket teve a ultima reabertura (Somente leitura).
+closedIn	datetime UTC	 	 	Data na qual o ticket foi indicado como fechado. A data informada deve estar no formato UTC.
+lastActionDate	datetime UTC	 	 	Data UTC da última ação do ticket (Somente leitura).
+actionCount	int	 	 	Quantidade de ações do ticket (Somente leitura).
+lastUpdate	datetime UTC	 	 	Data UTC da ultima alteração do ticket (Somente leitura).
+lifetimeWorkingTime	int	 	 	Tempo de vida do ticket em minutos em horas úteis desde a abertura (Somente leitura).
+stoppedTime	int	 	 	Tempo que o ticket ficou no status parado em minutos em horas corridas (Somente leitura).
+stoppedTimeWorkingTime	int	 	 	Tempo que o ticket ficou no status parado em minutos em horas úteis (Somente leitura).
+resolvedInFirstCall	bool	 	 	 A variável “resolvedInFirstCall”  só é preenchida exclusivamente quando o ticket é criado com o status Resolved ou Closed e é de origem de chat e ligações telefônicas. Sendo assim, a regra de tickets resolvidos em primeiro atendimento é exclusiva para tickets de atendimento de chats e ligações telefônicas.
+chatWidget	string	128	 	Aplicativo de chat através do qual o ticket foi aberto (Somente leitura).
+chatGroup	string	128	 	Grupo de chat através do qual o ticket foi aberto (Somente leitura).
+chatTalkTime	int	 	 	Tempo de duração do chat em segundos (Somente leitura).
+chatWaitingTime	int	 	 	Tempo que o cliente ficou aguardando para ser atendido em segundos (Somente leitura).
+sequence	int	 	 	Número inteiro armazenado no campo Sequência.
+slaAgreement	string	128	 	Contrato SLA utilizado no ticket (Somente leitura).
+slaAgreementRule	string	128	 	Regra do contrato SLA (Somente leitura).
+slaSolutionTime	int	 	 	Tempo de solução do contrato SLA (Somente leitura).
+slaResponseTime	int	 	 	Tempo de resposta do contrato SLA (Somente leitura).
+slaSolutionChangedByUser	bool	 	 	Indica se o contrato SLA foi manualmente alterado pelo usuário (Somente leitura).
+slaSolutionChangedBy	person	 	 	Dados da pessoa que alterou o contrato SLA (Somente leitura). ver documentação
+slaSolutionDate	datetime UTC	 	 	Data de solução do SLA. Caso informado, será considerado que o SLA foi manualmente alterado pelo usuário que criou a ação. A data informada deve estar no formato UTC.
+slaSolutionDateIsPaused	bool	 	 	Indica se a data de solução do SLA está pausada (Somente leitura).
+slaResponseDate	datetime UTC	 	 	Data UTC de resposta do SLA (Somente leitura).
+slaRealResponseDate	datetime UTC	 	 	Data UTC real da resposta do SLA (Somente leitura).
+jiraIssueKey	string	64	 	Chave da issue do Jira Software que está associada ao ticket por integração (Somente leitura).
+redmineIssueId	int	 	 	ID da issue do Redmine que está associada ao ticket por integração (Somente leitura).
+clients	person	 	  ✓  	Lista com os clientes do ticket. ver documentação
+actions	actions	 	✓	Lista com as ações do ticket. ver documentação
+parentTickets	parentTickets	 	 	Lista com os tickets pais. ver documentação
+childrenTickets	childrenTickets	 	 	Lista com os tickets filhos. ver documentação
+ownerHistories	ownerHistories	 	 	Lista com os históricos de responsabilidades do ticket (Somente leitura). ver documentação
+statusHistories	statusHistories	 	 	Lista com os históricos de status do ticket (Somente leitura). ver documentação
+satisfactionSurveyResponses	satisfaciton	 	 	A busca de resposta pela API de ticket está depreciada e não será mais retornada. Criamos uma nova API, "API - Pesquisa de satisfação - Respostas" para retornar os registros de pesquisa de satisfação. ver documentação
+customFieldValues	customField	 	 	Lista com os valores dos campos adicionais do ticket. ver documentação
+assets	assets	 	 	Lista com os ativos do ticket. ver documentação
+Atenção: As APIs do Movidesk podem levar alguns minutos para replicar tickets, usuários e outros registros sejam eles novos e/ou modificados. Por isso, é possível que eles não apareçam nos resultados da pesquisa imediatamente. 
+Tickets » Clientes
+ticket.clients[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	string	64	✓	Id (Cod. ref.) da empresa, departamento ou pessoa relacionado como cliente do ticket (Somente leitura).
+businessName	string	128	 	Nome do cliente (Somente leitura).
+email	string	128	 	E-mail principal do cliente (Somente leitura).
+phone	string	128	 	Telefone principal do cliente (Somente leitura).
+personType	int	1	✓ 	Pessoa = 1, Empresa = 2, Departamento = 4  (Somente leitura).
+profileType	int	1	✓ 	Agente = 1, Cliente = 2, Agente e Cliente = 3  (Somente leitura).
+isDeleted	bool	 	 	Verdadeiro se o cliente foi deletado (Somente leitura).
+organization	person	 	 	Organização do cliente (Somente leitura). ver documentação
+Tickets » Ações
+ticket.actions[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 10	* 	Id (Número da ação) (Somente leitura). *Deve ser informado quando necessário alterar a ação já existente.
+type	int	1	✓	Tipo da ação: 1 = Interna 2 = Pública. 
+origin	int	1	 	Origem da ação (Somente leitura).
+0
+
+First Action
+1
+
+Via web pelo cliente
+2	Via web pelo agente
+3	Recebido via email
+4	Gatilho do sistema
+5	Chat (online)
+6	Chat (offline)
+7	Email enviado pelo sistema
+8	Formulário de contato
+9	Via web API
+10	Abertura automática de tickets
+11	Issue integração Jira
+12	Issue integração Redmine
+13	Chamada recebida integração Telefonia
+14	Chamada realizada integração Telefonia
+15	Chamada perdida integração Telefonia
+16	Chamada que obteve desistência na fila de espera integração Telefonia
+17	Acesso remoto
+18	WhatsApp
+19	Integração Movidesk
+20	Integração Zenvia Chat
+21	Chamada não atendida integração Telefonia
+22	FacebookMessenger
+23	WhatsApp Business Movidesk
+24	Altu
+25	WhatsApp Ativo
+description	string	 max	✓	Descrição da ação. Em operações de escrita, esse campo será interpretado como HTML e deve ser corretamente formatado para ser apresentado normalmente na tela de tickets. Em operações de leitura, esse campo é somente texto.
+htmlDescription	string	max	 	Descrição da ação em formato HTML (Somente leitura). *Esse campo só é retornado quando a busca é feita por ID do Ticket. Na listagem de Tickets ele não será retornado. Para retornar o HTML, deve-se utilizar o endpoint /tickets/htmldescription.
+status	string	128	 	Status da ação (Somente leitura).
+justification	string	128	 	Justificativa da ação (Somente leitura).
+createdDate	datetime UTC	 	* 	Data de criação da ação. A data informada deve estar no formato UTC. *Caso não informada, será preenchida com a data atual.
+createdBy	person	 	 *	Dados do gerador da ação. *Obrigatório somente se houver registro de apontamentos na criação ou alteração da ação via API. ver documentação
+isDeleted	bool	 	 	Verdadeiro se a ação foi deletada (Somente leitura).
+timeAppointments	appointments	 	 	
+Dados dos apontamentos de hora. ver documentação
+
+expenses	expenses	 	 	
+Dados de despesas. ver documentação
+
+attachments	attachments	 	 	Dados dos anexos (Somente leitura). ver documentação
+tags	array	 	 	Lista de strings com as TAGs as quais a ação esta relacionada. Caso sejam informadas TAGs inexistentes, as mesmas serão adicionadas na base de dados.
+Tickets » Ações » Apontamentos de horas
+ticket.actions.timeAppointments[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 	 *	Id (Código) do apontamento (Somente leitura). *Deve ser informado quando necessário alterar o apontamento já existente.
+activity	string	128	✓	Deve ser uma atividade cadastrada previamente no sistema.
+date	datetime	 	✓	Deve conter a data com as horas zeradas Ex: 2016-08-24T00:00:00.
+periodStart	time	 	*	Período inicial do apontamento. Ex: 08:00:00. *Obrigatório quando determinado via parametrização.
+periodEnd	time	 	*	Período final do apontamento. Ex: 12:00:00. *Obrigatório quando determinado via parametrização.
+workTime	time	 	 *	Tempo total do apontamento. Ex: 04:00:00. *Obrigatório quando determinado via parametrização.
+accountedTime	decimal	 	 	Tempo contabilizado do apontamento em decimal. Ex: 7.7666666666666666 (Somente leitura)
+workTypeName	string	 	✓	Tipo do horário apontado.
+createdBy	person	 	 ✓	Dados do gerador do apontamento. ver documentação
+createdByTeam	team	 	*	Dados do time do gerador do apontamento. ver documentação
+Tickets » Ações » Despesas
+ticket.actions.expenses[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 1	 	Campo Identificador único da Despesa.
+type	string	128	✓	Descrição do Tipo de Despesa relacionado ao apontamento.
+serviceReport	string	 128	 	Número do Relatório de Serviço emitido contendo a despesa. Somente Leitura.
+createdBy	person	 128	✓	Cod. Ref. da pessoa que apontou a despesa. ver documentação
+createdByTeam	team	  128	 	Nome da Equipe da pessoa que apontou a despesa. ver documentação
+date	
+datetime
+
+UTC
+
+ 	 ✓	Data de criação da pessoa. Deve ser menor ou igual a data atual. A data informada deve estar no formato UTC*.
+quantity	int	1 	 	Quantidade de apontamento. Obrigatório quando não informado o campo value.
+value	decimal	 18,2	 	Valor em moeda apontado. Obrigatório quando não informado o campo quantity.
+Tickets » Ações » Anexos
+ticket.actions.attachments[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+fileName	string	255	✓	Nome do arquivo enviado (Somente leitura).
+path	string	255	✓	Hash do arquivo enviado (Somente leitura).
+createdBy	person	 	 	Dados do pessoa que enviou o arquivo (Somente leitura). ver documentação
+createdDate	datetime UTC	 	 	Data UTC que o arquivo foi enviado (Somente leitura).
+Tickets » Tickets Pais/Filhos
+ticket.parentTickets[n]
+ticket.childrenTickets[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 	✓ 	Id (Número) do ticket.
+subject	string	128	 	Assunto do ticket (Somente leitura).
+isDeleted	bool	 	 	Verdadeiro se foi deletado (Somente leitura).
+Tickets » Históricos de responsabilidades
+ticket.ownerHistories[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+ownerTeam	string	 128	  	Equipe do responsável pelo ticket (Somente leitura).
+owner	person	 	 	Dados do responsável pelo ticket (Somente leitura). ver documentação
+permanencyTimeFullTime	double	 	 	Tempo de permanência do responsável pelo ticket em segundos. (Somente leitura).
+permanencyTimeWorkingTime	double	 	 	Tempo útil de permanência do responsável pelo ticket em segundos. (Somente leitura).
+changedBy	person	 	 	Dados da pessoa que alterou o responsável pelo ticket (Somente leitura). ver documentação
+changedDate	datetime UTC	 	 	Data UTC que o responsável pelo ticket foi alterado (Somente leitura).
+Tickets » Históricos de status
+ticket.statusHistories[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+status	string	 128	  	Status do ticket (Somente leitura).
+justification	string	 128	 	Justificativa do ticket (Somente leitura). 
+permanencyTimeFullTime	double	 	 	Tempo de permanência do status do ticket em segundos. (Somente leitura).
+permanencyTimeWorkingTime	double	 	 	Tempo útil de permanência do status do ticket em segundos. (Somente leitura).
+changedBy	person	 	 	Dados da pessoa que alterou o status do ticket (Somente leitura). ver documentação
+changedDate	datetime UTC	 	 	Data UTC que o status do ticket foi alterado (Somente leitura).
+
+Tickets » Respostas de satisfação
+Importante: A busca de resposta pela API de ticket está depreciada e não será mais retornada. Criamos uma nova API, "API do Movidesk - Pesquisa de satisfação - Respostas - Movidesk Sistemas" para retornar os registros de pesquisa de satisfação
+ticket.satisfactionSurveyResponses[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 10	  	Id (Código) da resposta de satisfação (Somente leitura).
+responsedBy	person	 	 	Dados da pessoa que respondeu. ver documentação
+responseDate	datetime UTC	 	 	Data UTC da resposta.
+satisfactionSurveyModel	int	 10	 	Modelo de pontuação da resposta: 1 = Positivo/Negativo, 2 = Faces sorridentes, 3 = NPS (Somente leitura).
+satisfactionSurveyNetPromoterScoreResponse	int	 10 	 	Pontuação de 0 a 10 (NPS). *Obrigatório dependendo da escolha do satisfactionSurveyModel.
+satisfactionSurveyPositiveNegativeResponse	int	 10 	 	Pontuação: 1 = Positivo e 2 = Negativo. *Obrigatório dependendo da escolha do satisfactionSurveyModel.
+satisfactionSurveySmileyFacesResponse	int	 10 	 	Pontuação faces sorridentes: 1 = Muito insatisfeito, 2 = Insatisfeito, 3 = Neutro, 4 = Satisfeito, 5 = Muito satisfeito. *Obrigatório dependendo da escolha do satisfactionSurveyModel.
+comments	string	max	 	Comentários.
+Tickets » Campos adicionais
+ticket.customFieldValues[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+customFieldId	int	64	✓	Id do campo adicional (pode ser obtido na listagem de campos adicionais no website).
+customFieldRuleId	int	64	✓	Id da regra de exibição dos campos adicionais (pode ser obtido na listagem de regras para exibição no website).
+line	int	64	✓	Número da linha da regra de exibição na tela do ticket. Quando a regra não permitir a adição de novas linhas deve ser informado o valor 1 e não devem ser repetidos valores de campos adicionais para o id da regra em conjunto com o id do campo. Para alterar o valor de um campo deve ser informada a linha em que ele se encontra. Os campos que estiverem na base de dados e não forem enviados no corpo da requisição serão excluídos.
+value	string	max	 *	Valor texto do campo adicional. *Obrigatório quando o tipo do campo for: texto de uma linha, texto com várias linhas, texto HTML, expressão regular, numérico, data, hora, data e hora, e-mail, telefone ou URL. Os campos de data devem estar em horário *UTC e no formato YYYY-MM-DDThh:MM:ss.000Z e o campo hora deve ser informado juntamente com a data fixa "1991-01-01". O campo numérico deve estar no formato brasileiro, por exemplo "1.530,75".
+items	items	 	* 	Lista de itens. *Obrigatório quando o tipo do campo for: lista de valores, lista de pessoas, lista de clientes, lista de agentes, seleção múltipla ou seleção única. Deve ser informado apenas um item se o campo adicional não permitir seleção múltipla. Quando o campo for arquivo, ele é somente leitura. ver documentação
+  *Observação: Serão apresentadas na consulta da propriedade customFieldValues apenas campos adicionais que estiverem com suas regras de exibição sendo atingidas no momento da consulta.
+
+ 
+Tickets » Campos adicionais » Itens
+ticket.customFieldValues.items[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+personId	int	64	*	Id (Cod. ref.) da empresa, departamento ou pessoa. *Obrigatório quando o tipo do campo for lista de pessoas.
+clientId	int	64	*	Id (Cod. ref.) da empresa, departamento ou pessoa. *Obrigatório quando o tipo do campo for lista de clientes.
+team	string	128	*	Nome da equipe. *Obrigatório quando o tipo do campo lista de agentes (o personId pode ser informado para especificar o agente da equipe).
+customFieldItem	string	256	*	Nome do item do campo adicional. *Obrigatório quando o tipo do campo for: lista de valores, seleção múltipla ou seleção única.
+Tickets » Ativos
+ticket.assets[n]
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	string	64	✓ 	Id (Cod. ref.) do ativo (Somente leitura).
+name	string	 128	✓ 	Nome do ativo (Somente leitura).
+label	string	128	 	Etiqueta (única) do ativo (Somente leitura).
+serialNumber	string	128	 	Número de série do ativo (Somente leitura).
+categoryFull	array	 	 	Lista com os nomes dos níveis da categoria selecionada no ativo (Somente leitura).
+categoryFirstLevel	string	128	 	Nome do primeiro nível da categoria selecionada no ativo (Somente leitura).
+categorySecondLevel	string	128	 	Nome do segundo nível da categoria selecionada no ativo (Somente leitura).
+categoryThirdLevel	string	128	 	Nome do terceiro nível da categoria selecionada no ativo (Somente leitura).
+isDeleted	bool  	 	 	Verdadeiro se o ativo foi deletado do ticket (Somente leitura).
+Person
+ticket.clients[n].organization
+ticket.actions[n].createdBy
+ticket.actions[n].timeAppointments[n].createdBy
+ticket.owner
+ticket.createdBy
+ticket.slaSolutionChangedBy
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	string	64	 ✓ 	Id (Cod. ref.) da organização (Somente leitura, entretanto para "ticket.clients[n].organization" esse campo é configurável).
+businessName	string	128	 	Nome da organização (Somente leitura).
+email	string	128	 	E-mail principal da organização (Somente leitura).
+phone	string	128	 	Telefone principal da organização (Somente leitura).
+personType	int	1	 	Tipo da pessoa: Pessoa = 1, Empresa = 2, Departamento = 4  (Somente leitura).
+profileType	int	1	 	
+Perfil da pessoa: Agente = 1, Cliente = 2, Agente e Cliente = 3  (Somente leitura).
+
+Team
+ticket.actions[n].timeAppointments[n].createdByTeam
+
+Propriedade	Tipo	Tamanho	Obrigatório	Descrição
+id	int	 	 ✓ 	Id (Cod. ref.) do time (Somente leitura).
+name	string	128	 	Nome do time (Somente leitura).
+
+
+*UTC: O Tempo Universal Coordenado (do inglês Universal Time Coordinated) é o fuso horário de referência a partir do qual se calculam todas as outras zonas horárias do mundo. Ex: Se o seu fuso horário for o de Brasília (UTC-03:00) e o horário atual for 15h30, o horário UTC será 18h30.
+
+Trabalhando com os dados
+Para ter acesso aos dados é necessário que previamente seja gerada uma chave para a API
+
+Para gerar uma chave para a API (token), acesse ao Movidesk, vá em Configurações / Conta / Parâmetros e na guia ambiente clique no botão "Gerar nova chave" caso ainda não tenha uma criada.
+Você poderá repetir essa operação sempre que quiser gerar uma nova chave de acesso, mas lembre-se que ao gerar uma nova chave, todos os programas que utilizarem a chave antiga irão parar de funcionar.
+
+Todo o fluxo de dados (Visualização/Inserção/Alteração) devem possuir o formato JSON conforme exemplo abaixo:
+
+{ 
+  "id":1,
+  "protocol":"MOVI202109000001",
+  "type":2,
+  "subject":"Assunto",
+  "category":"Categoria",
+  "urgency":"Urgência",
+  "status":"Status",
+  "baseStatus":"Status base",
+  "justification":"Justificativa",
+  "origin":9,
+  "createdDate":"2016-11-18T14:25:07.1920886",
+  "originEmailAccount":"email@origem.com",
+  "owner":{ 
+    "id":"CodRefDoResponsável",
+    "personType":1,
+    "profileType":1,
+    "businessName":"Nome do responsável",
+    "email":"email@responsavel.com",
+    "phone":"(47) 99999-9999"
+  },
+  "ownerTeam":"Equipe (do) responsável",
+  "createdBy":{ 
+    "id":"CodRefDoGeradorDoTicket",
+    "personType":1,
+    "profileType":2,
+    "businessName":"Nome do gerador do ticket",
+    "email":"email@gerador.com",
+    "phone":"(47) 99999-9999"
+  },
+  "serviceFull":[ 
+    "Serviço nível 1",
+    "Serviço nível 2",
+    "Serviço nível 3"
+  ],
+  "serviceFirstLevelId":1,
+  "serviceFirstLevel":"Serviço nível 1",
+  "serviceSecondLevel":"Serviço nível 2",
+  "serviceThirdLevel":"Serviço nível 3",
+  "contactForm":"Formulário de contato",
+  "tags":[ 
+    "Tag1",
+    "Tag2",
+    "Tag3"
+  ],
+  "cc":"email@cc.com.br,email2@cc.com.br",
+  "resolvedIn":"2016-11-19T14:25:07.1920886",
+  "reopenedIn":"2016-11-20T14:25:07.1920886",
+  "closedIn":"2016-11-21T14:25:07.1920886",
+  "lastActionDate":"2016-11-21T14:25:07.1920886",
+  "actionCount":1,
+  "lastUpdate":"2016-11-21T14:25:07.1920886",
+  "lifeTimeWorkingTime":9999,
+  "stoppedTime":9,
+  "stoppedTimeWorkingTime":9,
+  "resolvedInFirstCall":false,
+  "chatWidget":"Chat - Exemplo",
+  "chatGroup":"Grupo do Chat",
+  "chatTalkTime":999,
+  "chatWaitingTime":9,
+  "sequence":2,
+  "slaAgreement":"SLA Utilizado",
+  "slaAgreementRule":"SLA Regra Utilizado",
+  "slaSolutionTime":999,
+  "slaResponseTime":99,
+  "slaSolutionChangedByUser":false,
+  "slaSolutionChangedBy":{ 
+    "id":"CodRef",
+    "personType":1,
+    "profileType":3,
+    "businessName":"Nome da pessoa que realizou a alteração",
+    "email":"email@email.com",
+    "phone":"(47) 99999-9999"
+  },
+  "slaSolutionDate":"2016-11-21T14:25:07.1920886",
+  "slaSolutionDateIsPaused":false,
+  "slaResponseDate":"2016-11-21T14:25:07.1920886",
+  "slaRealResponseDate":"2016-11-21T14:25:07.1920886",
+  "clients":[ 
+    { 
+      "id":"CodRefDoCliente",
+      "personType":2,
+      "profileType":2,
+      "businessName":"Nome do cliente",
+      "email":"email@client.com",
+      "phone":"(47) 99999-9999",
+      "isDeleted":false,
+      "organization":{ 
+        "id":"CodRefDaOrganização",
+        "personType":1,
+        "profileType":2,
+        "businessName":"Nome da organização",
+        "email":"email@organizacao.com",
+        "phone":"(47) 99999-9999"
+      }
+    }
+  ],
+  "actions":[ 
+    { 
+      "id":1,
+      "type":2,
+      "origin":9,
+      "description":"Descrição da ação",
+      "status":"Status",
+      "justification":"Justificativa",
+      "createdDate":"2016-11-21T14:25:07.1920886",
+      "createdBy":{ 
+        "id":"CodRefDoGeradorDaAção",
+        "personType":1,
+        "profileType":1,
+        "businessName":"Nome do gerador da ação",
+        "email":"email@gerador.com",
+        "phone":"(47) 99999-9999"
+      },
+      "isDeleted":false,
+      "timeAppointments":[ 
+        { 
+          "id":1,
+          "activity":"Atividade do apontamento",
+          "date":"2016-11-21T00:00:00",
+          "periodStart":"21:32:13.7345254",
+          "periodEnd":"21:39:08.3443985",
+          "workTime":"00:06:54.6098731",
+          "accountedTime":7.7666666666666666,
+          "workTypeName":"Hora Extra",
+          "createdBy":{ 
+            "id":"CodRefDoGeradorDoApontamento",
+            "personType":1,
+            "profileType":1,
+            "businessName":"Nome do gerador do apontamento",
+            "email":"email@gerador.com",
+            "phone":"(47) 99999-9999"
+          },
+          "createdByTeam":{ 
+            "id":101,
+            "name":"Qualidade"
+          }
+        }
+      ],
+      "expenses":[ 
+        { 
+          "id":12,
+          "type":"Transporte",
+          "serviceReport":"0",
+          "createdBy":{ 
+            "id":"9B7387E9-4C46-4BD0",
+            "personType":1,
+            "profileType":3,
+            "businessName":"Administrador",
+            "email":null,
+            "phone":null,
+            "address":null,
+            "complement":null,
+            "cep":null,
+            "city":null,
+            "bairro":null,
+            "number":null,
+            "reference":null
+          },
+          "createdByTeam":null,
+          "date":"2018-11-05T18:22:00",
+          "quantity":null,
+          "value":145.11
+        },
+        { 
+          "id":13,
+          "type":"Alimentação",
+          "serviceReport":"0",
+          "createdBy":{ 
+            "id":"9B7387E9-4C46-4BD0",
+            "personType":1,
+            "profileType":3,
+            "businessName":"Administrador",
+            "email":null,
+            "phone":null,
+            "address":null,
+            "complement":null,
+            "cep":null,
+            "city":null,
+            "bairro":null,
+            "number":null,
+            "reference":null
+          },
+          "createdByTeam":null,
+          "date":"2018-11-05T18:22:00",
+          "quantity":null,
+          "value":25.33
+        }
+      ],
+      "attachments":[ 
+        { 
+          "fileName":"minhaImagem.png",
+          "path":"7BDEA1B62A8641FF86982D0CF9F3DEC0",
+          "createdBy":{ 
+            "id":"CodRefDeQuemEnviouOArquivo",
+            "personType":1,
+            "profileType":1,
+            "businessName":"Nome de quem enviou o arquivo",
+            "email":"email@pessoa.com",
+            "phone":"(47) 99999-9999"
+          },
+          "createdDate":"2017-05-29T14:19:50.0129141"
+        }
+      ],
+      "parentTickets":[ 
+        { 
+          "id":2,
+          "subject":"Assunto do ticket pai",
+          "isDeleted":false
+        }
+      ],
+      "childrenTickets":[ 
+        { 
+          "id":3,
+          "subject":"Assunto do ticket filho",
+          "isDeleted":false
+        }
+      ],
+      "satisfactionSurveyResponses":[ 
+        { 
+          "id":1,
+          "responsedBy":{ 
+            "id":"CodRefDeQuemRespondeuAPesquisa",
+            "personType":1,
+            "profileType":2,
+            "businessName":"Nome de quem respondeu a pesquisa",
+            "email":"email@quemrespondeu.com",
+            "phone":"(47) 99999-9999"
+          },
+          "responseDate":"2016-11-22T14:25:07.1920886",
+          "satisfactionSurveyModel":2,
+          "satisfactionSurveyNetPromoterScoreResponse":null,
+          "satisfactionSurveyPositiveNegativeResponse":null,
+          "satisfactionSurveySmileyFacesResponse":5,
+          "comments":"Comentário na resposta da pesquisa"
+        }
+      ],
+      "customFieldValues":[ 
+        { 
+          "customFieldId":3,
+          "customFieldRuleId":2,
+          "line":1,
+          "value":null,
+          "items":[ 
+            { 
+              "personId":null,
+              "clientId":null,
+              "team":null,
+              "customFieldItem":"um"
+            }
+          ]
+        },
+        { 
+          "customFieldId":1,
+          "customFieldRuleId":1,
+          "line":1,
+          "value":"texto via api",
+          "items":[ 
+
+          ]
+        }
+      ]
+    }
+  ]
+}
+Obtendo dados
+Método GET
+
+Obtendo um único ticket
+GET: /tickets
+Parâmetros: id / protocol, token
+Parâmetro opcional (o valor padrão é falso): includeDeletedItems (caso verdadeiro retornará ações, clientes, tickets pais e tickets filhos que foram associados ao ticket e deletados)
+
+Exemplo:
+Obtendo o ticket com o id 1
+
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&id=1
+
+Retorno:
+
+  {
+    "id": 1,
+    "protocol":"MOVI202109000001",
+    "type": 2,
+    "origin": 0,
+    "status": "Novo",
+    "justification": null,
+    ... Demais colunas no formato do layout acima
+  }
+Obtendo o ticket com o protocolo MOVI202109000001
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&protocol=MOVI202109000001
+
+Retorno:
+
+  {
+    "id": 1,
+    "protocol":"MOVI202109000001",
+    "type": 2,
+    "origin": 0,
+    "status": "Novo",
+    "justification": null,
+    ... Demais colunas no formato do layout acima
+  }
+  *Campos adicionais: Serão apresentadas na consulta da propriedade customFieldValues apenas campos adicionais que estiverem com suas regras de exibição sendo atingidas no momento da consulta.
+
+Obtendo o HTML das ações de um ticket
+GET: /tickets/htmldescription
+Parâmetros: id / protocol, token
+Parâmetro opcional (o valor padrão é falso): id da action
+
+Exemplo:
+Obtendo o HTML da primeira action de um ticket com o id 1
+
+GET: https://api.movidesk.com/public/v1/tickets/htmldescription?token=52ee6ca5-8639-422b-bafe-470013c11176&id=1&actionId=1
+
+Retorno:
+
+  {
+"id": 1,
+"description": “<h1>title</h1></br><p>some text from action</p>”
+}
+Obtendo uma lista de tickets
+GET: /tickets
+Parametros: token, $select
+Parâmetro opcional (o valor padrão é falso): includeDeletedItems (caso verdadeiro retornará ações, clientes, tickets pais e tickets filhos que foram associados ao ticket e deletados)
+Exemplo:
+
+Obtendo uma lista de tickets (é obrigatório o uso da cláusula $select)
+
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$select=id,type,origin,status
+
+Retorno:
+
+  [
+    {
+      "id": 1,
+      "type": 2,
+      "origin": 0,
+      "status": "Novo"
+    },
+    {
+      "id": 2,
+      "type": 2,
+      "origin": 0,
+      "status": "Novo"
+    }
+    ... Demais itens da lista 
+  ]
+Obtendo tickets com filtros
+GET: /tickets
+Parâmetros: token, $select
+
+Para permitir e simplificar consultas com filtros, a API utiliza o protocolo aberto OData. Os filtros possíveis são: 
+• $filter: a expressão especificada com esse filtro é avaliada para cada item do retorno da consulta e somente os itens em que o resultado da expressão for verdadeiro serão incluídos no retorno final;
+• $orderby: permite que os itens do retorno da consulta sejam ordenados de forma ascendente (asc) ou descendente (desc). Se não for especificado asc ou desc, o padrão será asc;
+• $top: permite especificar o número de itens que devem ser incluídos no retorno da consulta;
+• $skip: permite especificar a quantidade de itens que devem ser ignorados e não incluídos no retorno da consulta;
+• $select: permite especificar propriedades especificas dos itens que devem ser preenchidas no retorno da consulta;
+• $expand: permite expandir as coleções filhas dos itens consultados.
+
+Atenção: Nós suportamos somente as palavras chave acima, sendo assim, o $count, por exemplo, não está disponível.
+Exemplos:
+Obtendo o id, o assunto e a data de criação dos tickets que possuam a data de criação maior do que 01-09-2016:
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$select=id,subject,createdDate&$filter=createdDate gt 2016-09-01T00:00:00.00z
+Retorno:
+[
+  {
+   "createdDate": "2016-09-05T14:27:58.9565653",
+   "subject": "Ticket 1 criado após 01-09-2016",
+   "id": 1
+ },
+ {
+   "createdDate": "2016-09-06T14:30:06.4217688",
+   "subject": "Ticket 2 criado após 01-09-2016",
+   "id": 2
+ },
+    ... Demais itens da lista que possuam a data de criação maior do que 01-09-2016
+]
+
+Obtendo o id, o assunto e a data de criação dos tickets que possuam a data de criação maior do que 01-09-2016 e ordenados de forma descendente em relação ao id:
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$select=id,subject,createdDate&$filter=createdDate gt 2016-09-01T00:00:00.00z&$orderby=id desc
+Retorno:
+[
+  {
+   "createdDate": "2016-11-06T14:27:58.9565653",
+   "subject": "Ticket 399 criado após 01-09-2016",
+   "id": 399
+ },
+ {
+   "createdDate": "2016-11-05T14:30:06.4217688",
+   "subject": "Ticket 398 criado após 01-09-2016",
+   "id": 398
+ },
+    ... Demais itens da lista que possuam a data de criação maior do que 01-09-2016 e ordenados de forma descendente em relação ao id
+]
+ 
+
+Obtendo o id, o assunto e a data de criação dos tickets que possuam a data de criação maior do que 01-09-2016, ordenados de forma descendente em relação ao id e filtrando o retorno para obter apenas 100 tickets, mas pulando os primeiros 100 (utilizado para paginação do retorno, no caso para obter a segunda página):
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$select=id,subject,createdDate&$filter=createdDate gt 2016-09-01T00:00:00.00z&$orderby=id desc&$top=100&$skip=100
+Retorno:
+[
+  {
+   "createdDate": "2016-10-06T14:27:58.9565653",
+   "subject": "Ticket 299 criado após 01-09-2016",
+   "id": 299
+ },
+ {
+   "createdDate": "2016-10-05T14:30:06.4217688",
+   "subject": "Ticket 298 criado após 01-09-2016",
+   "id": 298
+ },
+    ... Demais 98 itens da lista que possuam a data de criação maior do que 01-09-2016, ordenados de forma descendente em relação ao id
+]
+ 
+Obtendo o id, o assunto e a data de criação dos tickets que possuam a data de criação entre 10-10-2016 e 17-10-2016, expandindo o responsável, as ações (obtendo apenas a origem e o id), os apontamentos das ações e o geradores dos apontamentos.
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$select=id,subject,createdDate&$filter=createdDate ge 2016-10-10T00:00:00.00z and createdDate le 2016-10-17T00:00:00.00z&$expand=owner,actions($select=origin,id),actions($expand=timeAppointments($expand=createdBy))
+Retorno:
+[
+ {
+  "createdDate": "2016-10-12T21:25:58.2142783",
+  "subject": "Ticket que se encaixa nos filtros do exemplo",
+  "id": 291,
+  "actions": [   
+   {
+   "id": 1,
+   "origin": 9,
+   "timeAppointments": [
+    {
+    "createdBy": {
+    "id": "CodRefDoGerador",
+    "personType": 1,
+    "profileType": 3,
+    "businessName": "Nome do gerador",
+    "email": "email@gerador.com",
+    "phone": "(47) 99999-9999"
+     },
+    "id": 1,
+    "activity": "Atividade do apontamento",
+    "date": "2016-10-12T00:00:00",
+    "periodStart": "21:26:00",
+    "periodEnd": "21:27:00",
+    "workTime": "00:01:00",
+    "accountedTime":7.7666666666666666,
+    "workType": 2
+    }
+   ]
+  }
+ ],
+  "owner": {
+  "id": "CodRefDoResponsavel",
+  "personType": 1,
+  "profileType": 3,
+  "businessName": "Nome do responsável",
+  "email": "email@responsavel.com",
+  "phone": "(47) 99999-9999"
+  }
+ }
+]
+  
+
+Obtendo o id e clientes dos tickets onde qualquer cliente possua o id igual a 1:
+GET: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&$filter=clients/any(client: client/id eq '1')&$select=id&$expand=clients
+Retorno:
+[
+  {   
+   "id": 302,
+   "clients": [
+   {
+    "id": "1",
+    "personType": 2,
+    "profileType": 2,
+    "businessName": "Nome do cliente",
+    "email": "email@client.com",
+    "phone": "(47) 99999-9999",
+    "isDeleted": false,
+    "organization": 
+    {
+     "id": "CodRefDaOrganização",
+     "personType": 1,
+     "profileType": 2,
+     "businessName": "Nome da organização",
+     "email": "email@organizacao.com",
+     "phone": "(47) 99999-9999"
+    }
+  }],
+ },
+ {  
+   "id": 504,
+   "clients": [
+   {
+    "id": "1",
+    "personType": 2,
+    "profileType": 2,
+    "businessName": "Nome do cliente",
+    "email": "email@client.com",
+    "phone": "(47) 99999-9999",
+    "isDeleted": false,
+    "organization": 
+    {
+     "id": "CodRefDaOrganização",
+     "personType": 1,
+     "profileType": 2,
+     "businessName": "Nome da organização",
+     "email": "email@organizacao.com",
+     "phone": "(47) 99999-9999"
+    }
+  }],
+ },
+    ... Demais itens da lista que possuam a clientes com o id igual a 1
+]
+Inserindo dados
+Método POST
+
+POST: /tickets
+Parametros: token, returnAllProperties (valor default é false)
+Headers: Content-Type: application/json
+Corpo do post: {objeto JSON}
+Exemplo:
+POST: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&returnAllProperties=false
+Headers: Content-Type: application/json
+RequestBody:
+{  
+ "type": 2,
+ "subject": "Assunto",
+ "category": "Categoria",
+ "urgency": "Urgência",
+ "status": "Status",
+ "justification": "Justificativa",
+ "createdDate": "2016-11-18T14:25:07.1920886",
+  ... Demais colunas no formato do layout acima
+}
+Retorno: Status 200 e no corpo o id (número) do ticket inserido.
+
+Atualizando dados
+Método PATCH
+
+Diferentemente da inserção de dados (POST) a atualização é efetuada de forma parcial. Sendo assim é necessário enviar ao servidor somente os dados que se deseja alterar.
+Entretanto a alteração das listas (objetos filhos) sempre sobrescreve todos os itens da lista. 
+
+Nas listas de ações e apontamentos deve ser informado o Id no corpo para indicar alteração, pois quando o Id não for informado (for igual a zero) as ações e apontamentos
+ serão inseridos e não alterados. Nas listas de clientes e apontamentos serão excluídos os clientes e apontamentos que não forem informados no corpo.
+PATCH: /tickets
+Parâmetros: token, id
+Headers: Content-Type: application/json
+Corpo: {objeto JSON}
+Exemplos:
+Alterando o assunto do ticket com id (número do ticket) 1
+
+PATCH: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&id=1
+Headers: Content-Type: application/json
+RequestBody:
+{
+  "subject": "Movidesk"
+}
+Retorno: Status 200
+
+No exemplo acima, é alterado somente o campo subject, os demais campos permanecem inalterados
+
+Removendo as tags do ticket com id (número do ticket) 1
+
+PATCH: https://api.movidesk.com/public/v1/tickets?token=52ee6ca5-8639-422b-bafe-470013c11176&id=1
+Headers: Content-Type: application/json
+RequestBody:
+{
+  "tags": []
+}
+Retorno: Status 200
+Como as tags estão em uma lista, no exemplo acima, todos as tags serão removidas. Pois os valores informados na lista sempre sobrescrevem os valores previamente gravados.
+
+Anexos
+  URL:    /ticketFileUpload
+  Método: POST 
+Layout
+Parâmetro	Tipo	Tamanho	Obrigatório	Descrição
+id	int	10	✓	Id (número) do ticket existente. 
+actionId	int	10	✓	Id (número) da ação existente.
+POST: /ticketFileUpload
+Parametros: token, id e actionId
+Headers: Content-Type: multipart/form-data
+Corpo do post: anexos
+Exemplo:
+POST: https://api.movidesk.com/public/v1/ticketFileUpload?token=52ee6ca5-8639-422b-bafe-470013c11176&id=1452&actionId=1
+Headers: Content-Type: multipart/form-data
+RequestBody: anexos
+Retorno: Status 200 e no corpo os detalhes dos anexos inseridos (nome dos arquivos, hashes e possíveis erros)
+
+ 
+
+Exemplo de código fonte na linguagem C# da chamada da API 
+Método POST
+
+try
+{
+   var ticket = new
+   {
+     subject = "Novo ticket"
+   };
+   var json = JsonConvert.SerializeObject(ticket);
+
+   var response = await SendAsync("https://api.movidesk.com/public/v1/tickets?token=SEUTOKEN",
+   json, "POST", "application/json"); 
+}
+catch (WebException ex)
+{
+   var response = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+}
+
+public static async Task<string> SendAsync(string uri, string content, string method, string contentType)
+{
+  var req = WebRequest.Create(uri);
+  req.ContentType = contentType;
+  req.Method = method;
+
+  using (var stream = await req.GetRequestStreamAsync())
+  using (var streamWriter = new StreamWriter(stream))
+  {
+    await streamWriter.WriteAsync(content);
+  }
+
+  var httpResponse = (HttpWebResponse)await req.GetResponseAsync();
+  using (var stream = httpResponse.GetResponseStream())
+  {
+    if (stream == null)
+       return null;
+
+    using (var streamReader = new StreamReader(stream))
+    { 
+       return await streamReader.ReadToEndAsync();
+    }
+  }
+}
