@@ -42,3 +42,7 @@ class ErroConfiguracao(ErroInfraestrutura):
 
 class ErroTranscricao(ErroInfraestrutura):
     pass
+
+
+class ErroLLM(ErroInfraestrutura):
+    pass
