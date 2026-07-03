@@ -2,6 +2,7 @@ import typer
 
 from projetox.apresentacao.cli.comandos.acompanhamento import app as acompanhamento_app
 from projetox.apresentacao.cli.comandos.aprovacao import app as pendentes_app
+from projetox.apresentacao.cli.comandos.auditoria import app as auditoria_app
 from projetox.apresentacao.cli.comandos.llm import app as resumir_app
 from projetox.apresentacao.cli.comandos.memoria import app as salvar_app
 from projetox.apresentacao.cli.comandos.revisao import app as revisar_app
@@ -19,6 +20,7 @@ app.add_typer(resumir_app, name="resumir", help="Gerar resumo estruturado de ate
 app.add_typer(revisar_app, name="revisar", help="Revisar e editar resumo antes de salvar")
 app.add_typer(salvar_app, name="salvar", help="Salvar conhecimento no Obsidian")
 app.add_typer(pendentes_app, name="pendentes", help="Gerenciar acoes pendentes de aprovacao")
+app.add_typer(auditoria_app, name="auditoria", help="Consultar log de auditoria")
 
 if __name__ == "__main__":
     app()
