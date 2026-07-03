@@ -95,6 +95,30 @@ def iniciar_gravacao():
 
 
 @gravar_app.command()
+def pausar():
+    if not _servico_audio.esta_gravando():
+        console.print("[bold yellow]Nenhuma gravacao em andamento.[/]")
+        raise typer.Exit(code=1)
+    if _servico_audio.esta_pausado():
+        console.print("[bold yellow]Gravacao ja esta pausada.[/]")
+        raise typer.Exit(code=1)
+    _servico_audio.pausar_gravacao()
+    console.print(f"[bold green]Gravacao pausada![/]  {_indicador_gravacao()}")
+
+
+@gravar_app.command()
+def retomar():
+    if not _servico_audio.esta_gravando():
+        console.print("[bold yellow]Nenhuma gravacao em andamento.[/]")
+        raise typer.Exit(code=1)
+    if not _servico_audio.esta_pausado():
+        console.print("[bold yellow]Gravacao nao esta pausada.[/]")
+        raise typer.Exit(code=1)
+    _servico_audio.retomar_gravacao()
+    console.print(f"[bold green]Gravacao retomada![/]  {_indicador_gravacao()}")
+
+
+@gravar_app.command()
 def parar():
     if not _servico_audio.esta_gravando():
         console.print("[bold yellow]Nenhuma gravacao em andamento.[/]")

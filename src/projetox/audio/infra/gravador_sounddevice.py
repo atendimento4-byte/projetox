@@ -14,6 +14,7 @@ class GravadorSounddevice(IGravador):
         self.samplerate = samplerate
         self.channels = channels
         self._gravando: bool = False
+        self._pausado: bool = False
         self._arquivo_atual: Path | None = None
         self._arquivo: sf.SoundFile | None = None
         self._thread: threading.Thread | None = None
@@ -64,6 +65,31 @@ class GravadorSounddevice(IGravador):
         self._gravando = False
         self._arquivo_atual = None
         return path
+
+    def pausar(self) -> None:
+        if not self._gravando:
+            msg = "Nenhuma gravacao em andamento"
+            raise RuntimeError(msg)
+        if self._pausado:
+            msg = "Gravacao ja esta pausada"
+            raise RuntimeError(msg)
+        if self._stream is not None:
+            self._stream.stop()
+        self._pausado = True
+
+    def retomar(self) -> None:
+        if not self._gravando:
+            msg = "Nenhuma gravacao em andamento"
+            raise RuntimeError(msg)
+        if not self._pausado:
+            msg = "Gravacao nao esta pausada"
+            raise RuntimeError(msg)
+        if self._stream is not None:
+            self._stream.start()
+        self._pausado = False
+
+    def esta_pausado(self) -> bool:
+        return self._pausado
 
     def esta_gravando(self) -> bool:
         return self._gravando

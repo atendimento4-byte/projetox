@@ -23,5 +23,14 @@ class ServicoAudio:
     def parar_gravacao(self, _sessao_id: str) -> Path:
         return self.gravador.parar()
 
+    def pausar_gravacao(self) -> None:
+        self.gravador.pausar()
+
+    def retomar_gravacao(self) -> None:
+        self.gravador.retomar()
+
+    def esta_pausado(self) -> bool:
+        return self.gravador.esta_pausado()
+
     def esta_gravando(self) -> bool:
         return self.gravador.esta_gravando()
