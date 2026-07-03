@@ -13,6 +13,7 @@ from projetox.acompanhamento.aplicacao.servico_acompanhamento import (
 from projetox.acompanhamento.infra.repositorio_memoria import (
     RepositorioSessaoMemoria,
 )
+from projetox.compartilhado.cache import CacheMemoria
 from projetox.llm.aplicacao.servico_llm import ServicoLLM
 from projetox.llm.infra.extrator_anthropic import ExtratorAnthropic
 from projetox.transcricao.aplicacao.servico_transcricao import ServicoTranscricao
@@ -23,7 +24,8 @@ console = Console()
 
 _servico_acompanhamento = ServicoAcompanhamento(RepositorioSessaoMemoria())
 _servico_transcricao = ServicoTranscricao(TranscritorWhisper())
-_servico_llm = ServicoLLM(ExtratorAnthropic())
+_cache = CacheMemoria()
+_servico_llm = ServicoLLM(ExtratorAnthropic(), cache=_cache)
 
 
 def _exibir_resumo(resumo):
@@ -51,6 +53,9 @@ def resumir(
     ctx: typer.Context,
     texto: str | None = typer.Option(
         None, "--texto", "-t", help="Texto da transcricao para resumir",
+    ),
+    no_cache: bool = typer.Option(
+        False, "--no-cache", help="Ignorar cache de respostas LLM",
     ),
 ):
     if ctx.invoked_subcommand is not None:
@@ -85,17 +90,20 @@ def resumir(
 
         transcricao = resultado_transcricao.valor
 
+    servico = _servico_llm if not no_cache else ServicoLLM(ExtratorAnthropic())
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
         progress.add_task("Extraindo pontos-chave e gerando resumo...", total=None)
-        resultado = _servico_llm.resumir(transcricao)
+        resultado = servico.resumir(transcricao)
 
     if resultado.falha():
         console.print(f"[bold red]Erro ao gerar resumo:[/] {resultado.erro.mensagem}")
         raise typer.Exit(code=1)
 
-    console.print("[bold green]Resumo gerado com sucesso![/]")
+    cache_label = " [dim](cache)[/]" if servico.ultimo_cache_hit else ""
+    console.print(f"[bold green]Resumo gerado com sucesso![/]{cache_label}")
     _exibir_resumo(resultado.valor)
