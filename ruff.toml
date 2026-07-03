@@ -1,0 +1,11 @@
+line-length = 100
+
+[lint]
+select = [
+    "E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "COM", "C4",
+    "T10", "RUF", "PL", "PT", "RET", "TRY", "EM", "C90",
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["COM", "F401"]
+"**/erros/hierarquia.py" = ["N818"]
