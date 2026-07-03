@@ -1,6 +1,6 @@
 ---
 id: TASK-001
-status: READY
+status: DONE
 criada: 2026-07-03
 tipo: infra
 prioridade: P0
@@ -24,12 +24,12 @@ Configurar repositorio git, estrutura Python basica, e fazer primeiro commit.
 - `README.md` (link para SDD-Index)
 
 ## Criterios de Aceitacao
-- [ ] Git remote configurado e funcional
-- [ ] pyproject.toml basico com nome, versao, descricao
-- [ ] Estrutura src/ com __init__.py
-- [ ] .gitignore funcional
-- [ ] README.md referenciando documentacao
-- [ ] Primeiro commit realizado na branch main
+- [x] Git remote configurado e funcional
+- [x] pyproject.toml basico com nome, versao, descricao
+- [x] Estrutura src/ com __init__.py
+- [x] .gitignore funcional
+- [x] README.md referenciando documentacao
+- [x] Primeiro commit realizado na branch main
 
 ## Prompt para OpenCode
 Execute os comandos para finalizar o setup do repositorio:
@@ -46,4 +46,4 @@ Execute os comandos para finalizar o setup do repositorio:
 - [ ] Segue ADRs
 - [ ] Nao quebrou features existentes
 - [ ] Documentacao atualizada
-- [ ] Tarefa concluida em:
+- [x] Tarefa concluida em: 2026-07-03

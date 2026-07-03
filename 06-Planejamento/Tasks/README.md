@@ -46,7 +46,9 @@ ARCHIVED    — movida para historico
 
 ## Tarefas Concluidas
 
-*Nenhuma no momento.*
+| Task | Descricao | Status |
+|------|-----------|--------|
+| [[06-Planejamento/Tasks/task-001.md\|TASK-001]] | Setup do repositorio git e estrutura de pastas (B-001) | DONE |
 
 ---
 

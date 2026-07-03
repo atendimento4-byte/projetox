@@ -27,7 +27,7 @@ status: "concluido"
 | **Agentes de IA** | 5             |
 | **Diagramas Mermaid**              | 15                |
 | **Total de Linhas**                | ~11.200            |
-| **Skills do Hermes (prompts)**      | 12                |
+| **Skills do Hermes (prompts)**      | 14                |
 | **Palavras (estimado)**            | ~125.000           |
 
 ---

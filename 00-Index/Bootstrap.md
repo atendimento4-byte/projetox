@@ -45,31 +45,43 @@ C:\Users\v2admin\Documents\ProjetoX\start-opencode.cmd
 ## Passo 4 — Ciclo de Trabalho
 
 ```
-Hermes (navegador)              OpenCode (terminal)
-      │                              │
-      ├── [Context Loader]           │
-      │   Analisa projeto            │
-      │                              │
-      ├── [Task Manager]             │
-      │   Gera task + prompt ────────► Cola prompt
-      │                              │ Implementa
-      │                              │
-      │   ←── Output do OC ─────────┤
-      │                              │
-      ├── [Reviewer]                 │
-      │   Revisa resultado           │
-      │                              │
-      ├── Se REPROVADO:              │
-      │   Gera correcao ────────────► Corrige
-      │                              │
-      ├── Se APROVADO:               │
-      │   [Documentation Sync]       │
-      │   Lista atualizacoes         │
-      │                              │
-      └── Proxima task ─────────────► ...
+[VOCE]                     [HERMES]              [OPENCODE]
+  │                          │                      │
+  ├── Context Loader ──────► │                      │
+  │                          ├── Le SDD-Index       │
+  │                          ├── Le Arquitetura     │
+  │                          ├── Le Roadmap         │
+  │                          ├── Le ADRs            │
+  │                          ├── Le Logs            │
+  │◄── Resumo + prox task ──┤                      │
+  │                          │                      │
+  ├── Task Manager ─────────►│                      │
+  │                          ├── Gera task + prompt │
+  │◄── Prompt da tarefa ────┤                      │
+  │                          │                      │
+  ├── Cola prompt ─────────────────────────────────►│
+  │                          │                      ├── Le vault
+  │                          │                      ├── Implementa
+  │                          │                      ├── Testa
+  │                          │                      ├── Lint
+  │                          │                      ├── Prepara output
+  │◄── Output do OC ────────────────────────────────┤
+  │                          │                      │
+  ├── Reviewer + output ────►│                      │
+  │                          ├── Revisa              │
+  │◄── Aprovado/Rejeitado ──┤                      │
+  │                          │                      │
+  │  Se REJEITADO:                                  │
+  │  ├── Correcao ─────────────────────────────────►│
+  │  └── Volta ao Reviewer                          │
+  │                          │                      │
+  │  Se APROVADO:                                   │
+  ├── Doc Sync ─────────────►│                      │
+  │                          ├── Lista atualizacoes │
+  │◄── Docs a atualizar ────┤                      │
+  │                          │                      │
+  └── Proximo ciclo ────────────────────────────────┘
 ```
-
----
 
 ## Comandos do Dia a Dia
 
@@ -81,10 +93,11 @@ Hermes (navegador)              OpenCode (terminal)
 | Atualizar docs | `[Documentation Sync]` (Skill 4) |
 | Decisao arquitetural | `[Architecture Reviewer]` (Skill 5) |
 | Registrar ADR | `[ADR Manager]` (Skill 6) |
+| Acessar vault | `[Hermes-Vault]` (Skill 13) |
 | Commitar | `[Git Manager]` (Skill 10) |
 
 ---
 
-> [[00-Index/Hermes-Skills.md|Skills completas]]
+> [[00-Index/Hermes-Skills.md|Skills completas (14 skills)]]
 > [[00-Index/HERMES.md|Constituicao]]
 > [[00-Index/SDD-Index.md|Voltar ao indice]]

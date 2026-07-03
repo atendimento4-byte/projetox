@@ -365,5 +365,250 @@ Ciclo concluido → [Task Manager] para proxima
 
 ---
 
+## Skill 13: Hermes-Vault
+
+**Quando usar:** quando Hermes precisar ler, criar, editar ou pesquisar arquivos no vault Obsidian.
+
+Hermes e externo e nao acessa o vault diretamente. Esta skill define os comandos que o usuario executa em nome do Hermes (via teclado no Obsidian ou via OpenCode).
+
+```
+[HERMES-VAULT]
+Preciso acessar o vault Obsidian. Execute os comandos abaixo e me retorne o resultado.
+
+[COMANDOS DISPONIVEIS]
+LER <caminho>          — le conteudo de um arquivo .md
+PESQUISAR <termo>      — busca texto em todos os .md
+GLOB <padrao>          — encontra arquivos por padrão (ex: "04-Arquitetura/*.md")
+LISTAR <diretorio>     — lista arquivos de um diretorio
+CRIAR <caminho>        — cria novo arquivo .md com conteudo especificado
+EDITAR <caminho>       — edita arquivo existente (substitui trecho)
+ATUALIZAR_FRONTMATTER <caminho> <campo> <valor> — atualiza YAML frontmatter
+
+[FORMATO DE RESPOSTA]
+Para cada comando, retorne o resultado exato ou o erro.
+Se CRIAR ou EDITAR: confirme que foi feito com sucesso.
+
+[COMANDO]
+Execute:
+1. LER <caminho_do_arquivo>
+2. PESQUISAR <termo_de_busca>
+...
+Retorne o resultado de cada comando.
+```
+
+**Protocolo:** Hermes envia comandos, o usuario executa manualmente ou cola no OpenCode, e retorna o resultado ao Hermes.
+
+---
+
+## Skill 14: OpenCode
+
+**Quando usar:** Hermes esta prestes a enviar uma tarefa ao OpenCode. Define como o OpenCode opera, o que recebe e o que retorna.
+
+```
+[OPENCODE SKILL]
+Voce e o OpenCode, implementador do ProjetoX.
+
+[RESPONSABILIDADES]
+- Implementar codigo (apenas o que for solicitado)
+- Executar testes (pytest, lint, typecheck)
+- Criar commits (apenas quando autorizado)
+- Ler arquivos do vault para entender padroes
+- Responder com resultado estruturado
+
+[INPUT]
+Recebe um prompt do Hermes contendo:
+- Task ID e contexto
+- Criterios de aceitacao
+- Arquivos afetados
+- Instrucoes especificas
+
+[OUTPUT — FORMATO DE RESPOSTA]
+Sempre retorne:
+1. O que foi implementado (sumario)
+2. Arquivos criados/modificados
+3. Resultado dos testes
+4. Resultado do lint/typecheck
+5. Prompt de revisao pronto para o Hermes
+6. Proximo prompt sugerido para continuidade
+
+[REGRAS]
+- Nunca modifique documentacao do vault sem instrucao explicita
+- Nunca crie commits sem autorizacao
+- Siga Convencoes-Codigo.md e Estrutura-Projeto.md
+- Leia ADRs e arquitetura antes de implementar
+- Se faltar contexto, peca esclarecimento
+
+[COMANDO]
+Implemente a tarefa abaixo seguindo as regras acima.
+```
+
+---
+
+## Fluxo Completo (Hermes externo + OpenCode + Vault)
+
+```
+Usuario cola [Context Loader] no Hermes
+  │
+  ▼
+Hermes responde com analise + proxima tarefa
+  │
+  ▼
+Usuario cola [Task Manager] no Hermes
+  │
+  ▼
+Hermes gera task completa + prompt para OpenCode
+  │
+  ▼
+Usuario cola o prompt no OpenCode ←── VOCE ESTA AQUI
+  │
+  ▼
+OpenCode implementa, testa, analisa
+  │
+  ▼
+OpenCode prepara prompt de revisao (output estruturado)
+  │
+  ▼
+Usuario cola [Reviewer] + output do OpenCode no Hermes
+  │
+  ▼
+Hermes revisa — se REPROVADO: gera correcao → volta p/ OpenCode
+  │            — se APROVADO: lista docs a atualizar
+  ▼
+Usuario cola [Documentation Sync] no Hermes
+  │
+  ▼
+Hermes gera atualizacoes dos docs + Log de Sessao
+  │
+  ▼
+Usuario cola [Hermes-Vault] p/ executar atualizacoes no vault
+  │  (ou faz manualmente)
+  ▼
+Ciclo concluido → [Task Manager] para proxima
+```
+
+---
+
+## Ciclo Integrado (OpenCode como operador completo)
+
+Este e o modo que voce definiu: OpenCode opera sozinho entre interacoes com Hermes.
+
+```
+┌─────────────────────────────────────────────────┐
+│ 1. USUARIO: cola prompt inicial no OpenCode     │
+│    (Context Loader + Task Manager + reviewer)   │
+└─────────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────┐
+│ 2. OPENCODE:                                     │
+│    a) Le contexto do vault (SDD-Index, ADRs,     │
+│       arquitetura, backlog, ultimo log)          │
+│    b) Implementa a tarefa                        │
+│    c) Executa testes e lint                      │
+│    d) Analisa qualidade                          │
+│    e) Le docs para verificar conformidade        │
+│    f) Le backlog/roadmap para ver prox passo     │
+└─────────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────┐
+│ 3. OPENCODE: prepara prompt de saida             │
+│    [conteudo para colar no Hermes]               │
+│                                                  │
+│    Formato:                                      │
+│    ---                                           │
+│    Task: TASK-NNN                                │
+│    Status: IMPLEMENTED                           │
+│                                                  │
+│    ## Resultado                                  │
+│    - O que foi feito                            │
+│    - Arquivos alterados                         │
+│                                                  │
+│    ## Testes                                    │
+│    - Resultado: PASS/FAIL                       │
+│    - Cobertura                                  │
+│                                                  │
+│    ## Lint/Typecheck                            │
+│    - Resultado: PASS/FAIL                       │
+│                                                  │
+│    ## Proximos Passos (baseado no backlog)       │
+│    - Sugestao 1: B-NNN — descricao              │
+│    - Sugestao 2: B-NNN — descricao              │
+│                                                  │
+│    ## Prompt para Revisao (Hermes Reviewer)      │
+│    <reviewer_prompt_formatado>                   │
+│    ---                                           │
+└─────────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────┐
+│ 4. USUARIO: cola o prompt de saida no Hermes     │
+│    Hermes revisa, aprova/rejeita, gera prox task │
+└─────────────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────┐
+│ 5. USUARIO: cola a resposta do Hermes no         │
+│    OpenCode → volta ao passo 2                   │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## 13. Ciclo Integrado — Modo Autonomo (Hermes externo)
+
+Para sessoes onde o Hermes (Nous Research) esta disponivel:
+
+### Preparacao Inicial (unica vez)
+
+Antes do primeiro ciclo, carregue o contexto completo do projeto no Hermes:
+
+1. Cole o **[Context Loader]** (Skill 1) com dados reais do vault
+2. Hermes analisa e propoe primeira tarefa
+3. Cole o **[Task Manager]** (Skill 2) — Hermes gera task completa
+4. Pronto — ciclo padrao abaixo se aplica
+
+### Ciclo Padrao
+
+```
+[VOCE]                     [HERMES]              [OPENCODE]
+  │                          │                      │
+  ├── Context Loader ──────► │                      │
+  │                          ├── Analisa vault      │
+  │◄── Resumo + prox task ──┤                      │
+  │                          │                      │
+  ├── Task Manager ─────────►│                      │
+  │                          ├── Gera task + prompt │
+  │◄── Prompt da tarefa ────┤                      │
+  │                          │                      │
+  ├── Cola prompt ─────────────────────────────────►│
+  │                          │                      ├── Implementa
+  │                          │                      ├── Testa
+  │                          │                      ├── Analisa
+  │                          │                      ├── Prepara output
+  │◄── Output do OC ────────────────────────────────┤
+  │                          │                      │
+  ├── Reviewer + output ────►│                      │
+  │                          ├── Revisa             │
+  │◄── Aprovado/Rejeitado ──┤                      │
+  │                          │                      │
+  │  Se REJEITADO:                                  │
+  │  ├── Correcao ─────────────────────────────────►│
+  │  │                         │                    ├── Corrige
+  │  └── Volta ao Reviewer                          │
+  │                          │                      │
+  │  Se APROVADO:                                   │
+  ├── Doc Sync ─────────────►│                      │
+  │                          ├── Lista atualizacoes │
+  │◄── Docs a atualizar ────┤                      │
+  │                          │                      │
+  ├── Hermes-Vault ─────────►│                      │
+  │    (ou faz manualmente)  │                      │
+  │                          │                      │
+  └── Proximo ciclo ────────────────────────────────┘
+```
+
+---
+
 > [[00-Index/HERMES.md|Voltar a Constituicao]]
 > [[00-Index/SDD-Index.md|Voltar ao indice]]
