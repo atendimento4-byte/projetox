@@ -9,3 +9,4 @@ select = [
 [lint.per-file-ignores]
 "__init__.py" = ["COM", "F401"]
 "**/erros/hierarquia.py" = ["N818"]
+"tests/**" = ["PLC0415", "PLR2004"]
