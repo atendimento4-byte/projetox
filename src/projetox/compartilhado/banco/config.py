@@ -15,7 +15,7 @@ class Base(DeclarativeBase):
 def get_db_url() -> str:
     return os.getenv(
         "DATABASE_URL",
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/projetox",
+        "postgresql+asyncpg://projetox:projetox123@localhost:5432/projetox",
     )
 
 

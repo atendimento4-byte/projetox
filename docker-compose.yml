@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: projetox-postgres
+    environment:
+      POSTGRES_DB: projetox
+      POSTGRES_USER: projetox
+      POSTGRES_PASSWORD: projetox123
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/projetox/compartilhado/banco/migracoes/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U projetox"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: projetox-qdrant
+    ports: ["6333:6333", "6334:6334"]
+    volumes:
+      - qdrant_data:/qdrant/storage
+volumes:
+  postgres_data:
+  qdrant_data:
