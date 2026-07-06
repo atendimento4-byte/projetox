@@ -55,7 +55,7 @@ class RepositorioNotasObsidian(IRepositorioNotas):
             caminho.write_text(conteudo, encoding="utf-8")
             return Resultado.sucesso(str(caminho))
         except Exception as e:
-            return Resultado.falha(e)
+            return Resultado.falha_com_erro(e)
 
     def salvar_cliente(
         self, nome: str, resumo: ResumoAtendimento,
@@ -85,4 +85,4 @@ class RepositorioNotasObsidian(IRepositorioNotas):
             caminho.write_text(conteudo, encoding="utf-8")
             return Resultado.sucesso(str(caminho))
         except Exception as e:
-            return Resultado.falha(e)
+            return Resultado.falha_com_erro(e)

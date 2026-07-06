@@ -19,7 +19,7 @@ def servico() -> ServicoAcompanhamento:
 @pytest.mark.asyncio
 async def test_iniciar_sessao(servico: ServicoAcompanhamento) -> None:
     sessao = await servico.iniciar(
-        chamado="12345", cliente="Empresa Teste", tecnico="João", tipo="suporte"
+        chamado="12345", cliente="Empresa Teste", tecnico="João", tipo="suporte",
     )
     assert sessao.chamado == "12345"
     assert sessao.cliente == "Empresa Teste"

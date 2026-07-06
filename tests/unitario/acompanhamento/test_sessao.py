@@ -38,6 +38,6 @@ class TestSessaoAcompanhamento:
 
     def test_sessao_str_repr(self) -> None:
         sessao = SessaoAcompanhamento(
-            chamado="123", cliente="Teste", status="active"
+            chamado="123", cliente="Teste", status="active",
         )
         assert "chamado=123" in str(sessao) or "123" in str(sessao)

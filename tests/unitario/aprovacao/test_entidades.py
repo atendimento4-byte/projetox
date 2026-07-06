@@ -31,14 +31,14 @@ class TestAcaoPendente:
 
     def test_aprovar_acao(self) -> None:
         acao = AcaoPendente(
-            id="act-003", tipo="email", titulo="Enviar email", descricao="", dados={}
+            id="act-003", tipo="email", titulo="Enviar email", descricao="", dados={},
         )
         acao.status = "aprovada"
         assert acao.status == "aprovada"
 
     def test_rejeitar_acao(self) -> None:
         acao = AcaoPendente(
-            id="act-004", tipo="email", titulo="Enviar email", descricao="", dados={}
+            id="act-004", tipo="email", titulo="Enviar email", descricao="", dados={},
         )
         acao.status = "rejeitada"
         assert acao.status == "rejeitada"

@@ -33,7 +33,7 @@ class TestRespostaIpc:
 
     def test_resposta_erro(self) -> None:
         resp = RespostaIpc(
-            id="msg-001", sucesso=False, erro="Metodo nao encontrado"
+            id="msg-001", sucesso=False, erro="Metodo nao encontrado",
         )
         assert not resp.sucesso
         assert resp.erro == "Metodo nao encontrado"

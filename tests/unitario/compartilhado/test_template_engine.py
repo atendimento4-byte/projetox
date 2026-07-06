@@ -1,8 +1,6 @@
 """Testes unitários para o motor de templates."""
 from __future__ import annotations
 
-from pathlib import Path
-
 from projetox.compartilhado.modelos.tipos_nota import TipoNota
 
 
