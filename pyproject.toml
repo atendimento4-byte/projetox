@@ -22,6 +22,7 @@ dependencies = [
     "structlog>=24",
     "sounddevice>=0.5",
     "soundfile>=0.12",
+    "qdrant-client>=1.12",
 ]
 
 [project.optional-dependencies]
@@ -40,3 +41,6 @@ projetox = "projetox.apresentacao.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
