@@ -5,7 +5,8 @@ __pycache__/
 dist/
 build/
 .venv/
-venv/
+.ruff_cache/
+.mypy_cache/
 .env
 
 # IDE
