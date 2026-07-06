@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
+import structlog
 import typer
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -13,6 +14,8 @@ from projetox.acompanhamento.aplicacao.servico_acompanhamento import (
 from projetox.acompanhamento.infra.repositorio_memoria import (
     RepositorioSessaoMemoria,
 )
+from projetox.busca.aplicacao.servico_busca import ServicoBusca
+from projetox.busca.infra.qdrant_repo import QdrantRepositorioBusca
 from projetox.compartilhado.cache import CacheMemoria
 from projetox.llm.aplicacao.servico_llm import ServicoLLM
 from projetox.llm.infra.extrator_anthropic import ExtratorAnthropic
@@ -21,11 +24,20 @@ from projetox.transcricao.infra.transcritor_whisper import TranscritorWhisper
 
 app = typer.Typer(name="resumir", help="Gerar resumo estruturado de atendimento")
 console = Console()
+logger = structlog.get_logger(__name__)
 
 _servico_acompanhamento = ServicoAcompanhamento(RepositorioSessaoMemoria())
 _servico_transcricao = ServicoTranscricao(TranscritorWhisper())
 _cache = CacheMemoria()
 _servico_llm = ServicoLLM(ExtratorAnthropic(), cache=_cache)
+
+
+def _get_busca() -> ServicoBusca:
+    busca: ServicoBusca | None = getattr(_get_busca, "_cache", None)
+    if busca is None:
+        busca = ServicoBusca(QdrantRepositorioBusca(), _servico_llm)
+        _get_busca._cache = busca
+    return busca
 
 
 def _exibir_resumo(resumo):
@@ -92,13 +104,40 @@ def resumir(
 
     servico = _servico_llm if not no_cache else ServicoLLM(ExtratorAnthropic())
 
+    contexto_recuperado: str | None = None
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Buscando atendimentos similares...", total=None)
+        try:
+            similares = asyncio.run(_get_busca().buscar_similares(transcricao, limite=3))
+            if similares:
+                partes = ["Atendimentos anteriores similares:"]
+                for i, doc in enumerate(similares, 1):
+                    cliente = doc.metadados.get("cliente", "?")
+                    problema = doc.metadados.get("problema", "")
+                    solucao = doc.metadados.get("solucao", "")
+                    partes.append(
+                        f"\n--- Atendimento {i} (relevancia: {doc.pontuacao:.2f}) ---\n"
+                        f"Cliente: {cliente}\nProblema: {problema}\nSolucao: {solucao}\n",
+                    )
+                contexto_recuperado = "".join(partes)
+                logger.info(
+                    "contexto_recuperado",
+                    quantidade=len(similares),
+                )
+        except Exception as exc:
+            logger.warning("falha_busca_contexto", erro=str(exc))
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
         progress.add_task("Extraindo pontos-chave e gerando resumo...", total=None)
-        resultado = servico.resumir(transcricao)
+        resultado = servico.resumir(transcricao, contexto_recuperado=contexto_recuperado)
 
     if resultado.falha():
         console.print(f"[bold red]Erro ao gerar resumo:[/] {resultado.erro.mensagem}")

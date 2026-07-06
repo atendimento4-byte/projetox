@@ -116,9 +116,9 @@ status: "concluido"
 
 | ID | Item | Prioridade | EsforÃ§o | RF |
 |----|------|:----------:|:-------:|:--:|
-| B-053 | IndexaÃ§Ã£o do Obsidian no Qdrant (embeddings) | P0 | 3 dias | RF-CONSULTA-002 |
-| B-054 | CLI: comando `buscar` â€” busca semÃ¢ntica na base | P0 | 2 dias | RF-CONSULTA-002 |
-| B-055 | CLI: sugestÃ£o automÃ¡tica durante atendimento | P1 | 3 dias | RF-IA-001 |
+| B-053 | Indexação do Obsidian no Qdrant (embeddings) | P0 | 3 dias | RF-CONSULTA-002 |
+| B-054 | CLI: comando `buscar` — busca semântica na base | P0 | 2 dias | RF-CONSULTA-002 |
+| **B-055** | **✅ Sugestão automática durante atendimento (RAG)** | **P1** | **3 dias** | **RF-IA-001** |
 | B-056 | CLI: comando `historico` â€” consultar histÃ³rico do cliente | P1 | 2 dias | RF-CONSULTA-001 |
 | B-057 | Resposta a perguntas em linguagem natural | P2 | 4 dias | RF-IA-003 |
 | B-058 | Ranqueamento de resultados por relevÃ¢ncia | P2 | 2 dias | â€” |
