@@ -108,7 +108,9 @@ status: "concluido"
 | B-049 | CLI: comando `pendentes` â€” listar aÃ§Ãµes aguardando aprovaÃ§Ã£o | P0 | 1 dia | RF-UI-003 |
 | B-050 | CLI: comandos `aprovar`, `editar`, `rejeitar`, `adiar` | P0 | 2 dias | RF-SEG-001 |
 | B-051 | Log de auditoria (todas as aÃ§Ãµes) | P0 | 2 dias | RF-SEG-003 |
-| B-052 | Feedback visual para cada aÃ§Ã£o executada | P1 | 1 dia | â€” |
+| B-052 | Feedback visual para cada ação executada | P1 | 1 dia | — |
+| **B-083** | **CLI: `pendentes criar` — follow-up manual com responsável e prazo** | **P1** | **2 dias** | **—** |
+| B-084 | Cron job de lembrete: notificar pendentes vencendo/vencidos | P2 | 1 dia | B-083 |
 
 ### Ã‰pico 6: Busca e Consulta
 
@@ -180,7 +182,7 @@ status: "concluido"
 | Ã‰pico 2 â€” TranscriÃ§Ã£o | 5 | 2 | 2 | â€” | 9 |
 | Ã‰pico 3 â€” MemÃ³ria | 7 | 2 | â€” | â€” | 9 |
 | Ã‰pico 4 â€” DocumentaÃ§Ã£o | 7 | 1 | 3 | â€” | 11 |
-| Ã‰pico 5 â€” AprovaÃ§Ãµes | 4 | 1 | â€” | â€” | 5 |
+| Ã‰pico 5 â€” AprovaÃ§Ãµes | 4 | 1 | 2 | â€” | 7 |
 | Ã‰pico 6 â€” Busca | 2 | 2 | 2 | â€” | 6 |
 | PÃ³s-MVP | â€” | 1 | 12 | 16 | 29 |
 | **Total** | **37** | **11** | **22** | **16** | **86** |
