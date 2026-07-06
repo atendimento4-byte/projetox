@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from projetox.compartilhado.erros.resultado import Resultado
@@ -8,7 +9,10 @@ from projetox.compartilhado.modelos.tipos_nota import TipoNota
 from projetox.llm.dominio.entidades import ResumoAtendimento
 from projetox.memoria.dominio.interfaces import IRepositorioNotas
 
-_VAULT_PADRAO = "C:\\Users\\v2admin\\Documents\\Obisidian\\ProjetoX"
+_VAULT_PADRAO = os.getenv(
+    "OBSIDIAN_VAULT_PATH",
+    "C:\\Users\\v2admin\\Documents\\Obisidian\\ProjetoX",
+)
 
 
 class RepositorioNotasObsidian(IRepositorioNotas):
