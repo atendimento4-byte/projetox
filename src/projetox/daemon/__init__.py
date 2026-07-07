@@ -26,7 +26,7 @@ from projetox.compartilhado.ipc import servidor
 from projetox.compartilhado.ipc.servidor import ServidorIPC
 from projetox.llm.aplicacao.servico_llm import ServicoLLM
 from projetox.llm.dominio.entidades import ResumoAtendimento
-from projetox.llm.infra.extrator_anthropic import ExtratorAnthropic
+from projetox.llm.infra.extrator_nvidia import ExtratorNVIDIA
 from projetox.memoria.aplicacao.servico_memoria import ServicoMemoria
 from projetox.memoria.infra.repositorio_obsidian import (
     RepositorioNotasObsidian,
@@ -64,7 +64,7 @@ def _criar_servicos() -> dict:
         "audio": ServicoAudio(GravadorSounddevice()),
         "memoria": ServicoMemoria(RepositorioNotasObsidian()),
         "transcricao": ServicoTranscricao(TranscritorWhisper()),
-        "llm": ServicoLLM(ExtratorAnthropic()),
+        "llm": ServicoLLM(ExtratorNVIDIA()),
         "aprovacao": ServicoAprovacao(RepositorioAprovacaoMemoria()),
         "auditoria": ServicoAuditoria(),
     }

@@ -18,7 +18,7 @@ from projetox.busca.aplicacao.servico_busca import ServicoBusca
 from projetox.busca.infra.qdrant_repo import QdrantRepositorioBusca
 from projetox.compartilhado.cache import CacheMemoria
 from projetox.llm.aplicacao.servico_llm import ServicoLLM
-from projetox.llm.infra.extrator_anthropic import ExtratorAnthropic
+from projetox.llm.infra.extrator_nvidia import ExtratorNVIDIA
 from projetox.transcricao.aplicacao.servico_transcricao import ServicoTranscricao
 from projetox.transcricao.infra.transcritor_whisper import TranscritorWhisper
 
@@ -29,7 +29,7 @@ logger = structlog.get_logger(__name__)
 _servico_acompanhamento = ServicoAcompanhamento(RepositorioSessaoMemoria())
 _servico_transcricao = ServicoTranscricao(TranscritorWhisper())
 _cache = CacheMemoria()
-_servico_llm = ServicoLLM(ExtratorAnthropic(), cache=_cache)
+_servico_llm = ServicoLLM(ExtratorNVIDIA(), cache=_cache)
 
 
 def _get_busca() -> ServicoBusca:
@@ -102,7 +102,7 @@ def resumir(
 
         transcricao = resultado_transcricao.valor
 
-    servico = _servico_llm if not no_cache else ServicoLLM(ExtratorAnthropic())
+    servico = _servico_llm if not no_cache else ServicoLLM(ExtratorNVIDIA())
 
     contexto_recuperado: str | None = None
     with Progress(

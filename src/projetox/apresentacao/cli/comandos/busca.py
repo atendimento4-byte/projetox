@@ -11,14 +11,14 @@ from projetox.busca.aplicacao.servico_busca import ServicoBusca
 from projetox.busca.infra.qdrant_repo import QdrantRepositorioBusca
 from projetox.compartilhado.cache import CacheMemoria
 from projetox.llm.aplicacao.servico_llm import ServicoLLM
-from projetox.llm.infra.extrator_anthropic import ExtratorAnthropic
+from projetox.llm.infra.extrator_nvidia import ExtratorNVIDIA
 
 app = typer.Typer(name="busca", help="Busca semantica em atendimentos")
 console = Console()
 
 _repo = QdrantRepositorioBusca()
 _cache = CacheMemoria()
-_llm = ServicoLLM(ExtratorAnthropic(), cache=_cache)
+_llm = ServicoLLM(ExtratorNVIDIA(), cache=_cache)
 _servico = ServicoBusca(repo=_repo, llm=_llm)
 
 
