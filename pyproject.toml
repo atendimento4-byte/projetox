@@ -23,6 +23,7 @@ dependencies = [
     "sounddevice>=0.5",
     "soundfile>=0.12",
     "qdrant-client>=1.12",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]

@@ -1,6 +1,15 @@
-import typer
+from __future__ import annotations
 
-from projetox.apresentacao.cli.comandos.acompanhamento import app as acompanhamento_app
+import typer
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ruff: noqa: E402 — load_dotenv() precisa executar antes das importacoes do projeto
+
+from projetox.apresentacao.cli.comandos.acompanhamento import (
+    app as acompanhamento_app,
+)
 from projetox.apresentacao.cli.comandos.aprovacao import app as pendentes_app
 from projetox.apresentacao.cli.comandos.auditoria import app as auditoria_app
 from projetox.apresentacao.cli.comandos.busca import app as busca_app

@@ -11,7 +11,7 @@ from projetox.llm.dominio.entidades import ResumoAtendimento
 from projetox.llm.dominio.interfaces import IExtratorLLM
 
 _NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
-_MODELO_PADRAO = "nvidia/llama-3.1-nemotron-70b-instruct"
+_MODELO_PADRAO = "meta/llama-3.1-8b-instruct"
 
 _PROMPT = """Voce e um assistente especializado em analisar transcricoes de atendimentos tecnicos.
 
